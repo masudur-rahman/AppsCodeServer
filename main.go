@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"strings"
 )
 
 // Structures of users
@@ -27,12 +29,20 @@ type Worker struct {
 	Salary   int    `json:"salary"`
 }
 
-
+// List of workers and authenticated users
 var Workers = make(map[string]Worker)
-
+var authUser = make(map[string]string)
 
 // Handler Functions....
 func ShowAllWorkers(w http.ResponseWriter, r *http.Request) {
+
+	if info, valid := basicAuth(r); !valid{
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(info))
+		return
+	}
+
+
 	if err := json.NewEncoder(w).Encode(Workers); err != nil {
 		panic(err)
 	}
@@ -42,6 +52,14 @@ func ShowAllWorkers(w http.ResponseWriter, r *http.Request) {
 
 
 func ShowSinigleWorker(w http.ResponseWriter, r *http.Request) {
+
+	if info, valid := basicAuth(r); !valid{
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(info))
+		return
+	}
+
+
 	params := mux.Vars(r)
 
 	if info, exist := Workers[params["username"]]; exist {
@@ -55,6 +73,14 @@ func ShowSinigleWorker(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 func AddNewWorker(w http.ResponseWriter, r *http.Request) {
+
+	if info, valid := basicAuth(r); !valid{
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(info))
+		return
+	}
+
+
 	var worker Worker
 	if err := json.NewDecoder(r.Body).Decode(&worker); err != nil {
 		panic(err)
@@ -74,6 +100,14 @@ func AddNewWorker(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateWorkerProfile(w http.ResponseWriter, r *http.Request) {
+
+	if info, valid := basicAuth(r); !valid{
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(info))
+		return
+	}
+
+
 	//params := mux.Vars(r)
 	var worker Worker
 
@@ -95,6 +129,14 @@ func UpdateWorkerProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteWorker(w http.ResponseWriter, r *http.Request) {
+
+	if info, valid := basicAuth(r); !valid{
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(info))
+		return
+	}
+
+
 	params := mux.Vars(r)
 
 	if _, exist := Workers[params["username"]]; !exist {
@@ -109,6 +151,7 @@ func DeleteWorker(w http.ResponseWriter, r *http.Request) {
 
 // Creating initial worker profiles
 func CreateInitialWorkerProfile() {
+
 	/*Workers = map[string]Worker{
 		"masud": {Person{
 			Username: "masud", FirstName:"Masudur", LastName:"Rahman", Address{City: "Madaripur", Division: "Dhaka"} },Position: "Software Engineer", Salary: 55}
@@ -154,8 +197,42 @@ func CreateInitialWorkerProfile() {
 	}
 	Workers["jenny"] = worker
 
+	authUser["masud"] = "pass"
+	authUser["admin"] = "admin"
+
 }
 
+
+func basicAuth(r *http.Request)(string, bool){
+
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == ""{
+		return "Error: Authorization Needed...!", false
+	}
+
+	authInfo := strings.SplitN(authHeader, " ", 2)
+
+	userInfo, err := base64.StdEncoding.DecodeString(authInfo[1])
+
+	if err != nil{
+		return "Error: Error while decoding...!", false
+	}
+	userPass := strings.SplitN(string(userInfo), ":", 2)
+
+	if len(userPass) != 2{
+		return "Error: Authorization failed...!", false
+	}
+
+	if pass, exist := authUser[userPass[0]]; exist{
+		if pass != userPass[1]{
+			return "Error: Unauthorized User", false
+		}else{
+			return "Success: Authorization Successful...!!", true
+		}
+	}else{
+		return "Error: Unauthorized User...!", false
+	}
+}
 
 
 func main() {
