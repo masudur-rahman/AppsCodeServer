@@ -7,30 +7,40 @@ import (
 	"net/http"
 )
 
+// Structures of users
 type Person struct {
 	Username  string  `json:"username"`
 	FirstName string  `json:"firstname"`
 	LastName  string  `json:"lastname"`
 	Address   Address `json:"address"`
 }
+
 type Address struct {
 	City     string `json:"city"`
 	Division string `json:"division"`
 }
+
+
 type Worker struct {
 	Person
 	Position string `json:"position"`
 	Salary   int    `json:"salary"`
 }
 
+
 var Workers = make(map[string]Worker)
 
+
+// Handler Functions....
 func ShowAllWorkers(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(Workers); err != nil {
 		panic(err)
 	}
+
 	w.WriteHeader(http.StatusOK)
 }
+
+
 func ShowSinigleWorker(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
@@ -41,6 +51,7 @@ func ShowSinigleWorker(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("404 - Content Not Found"))
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 }
 func AddNewWorker(w http.ResponseWriter, r *http.Request) {
@@ -48,16 +59,20 @@ func AddNewWorker(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&worker); err != nil {
 		panic(err)
 	}
+
 	if _, exist := Workers[worker.Username]; exist {
 		w.WriteHeader(http.StatusConflict)
 		w.Write([]byte("409 - username already exists"))
 		return
 	}
+
 	Workers[worker.Username] = worker
 	json.NewEncoder(w).Encode(Workers)
+
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("201 - Created successfully"))
 }
+
 func UpdateWorkerProfile(w http.ResponseWriter, r *http.Request) {
 	//params := mux.Vars(r)
 	var worker Worker
@@ -71,11 +86,14 @@ func UpdateWorkerProfile(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("404 - Content Not Found"))
 		return
 	}
+
 	Workers[worker.Username] = worker
 	json.NewEncoder(w).Encode(Workers)
+
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("201 - Updated successfully"))
 }
+
 func DeleteWorker(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
@@ -84,6 +102,7 @@ func DeleteWorker(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("404 - Content Not Found"))
 		return
 	}
+
 	delete(Workers, params["username"])
 	w.WriteHeader(http.StatusOK)
 }
@@ -104,6 +123,7 @@ func CreateInitialWorkerProfile() {
 			Salary: 55,
 	}
 	Workers["masud"] = worker
+
 	worker = Worker{
 		Person:Person{Username:"fahim",
 			FirstName: "Fahim",
@@ -113,6 +133,7 @@ func CreateInitialWorkerProfile() {
 			Salary: 55,
 	}
 	Workers["fahim"] = worker
+
 	worker = Worker{
 		Person:Person{Username:"tahsin",
 			FirstName: "Tahsin",
@@ -122,6 +143,7 @@ func CreateInitialWorkerProfile() {
 			Salary: 55,
 	}
 	Workers["tahsin"] = worker
+
 	worker = Worker{
 		Person:Person{Username:"jenny",
 			FirstName: "Jannatul",
@@ -133,6 +155,8 @@ func CreateInitialWorkerProfile() {
 	Workers["jenny"] = worker
 
 }
+
+
 
 func main() {
 	router := mux.NewRouter()
