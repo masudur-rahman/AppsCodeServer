@@ -1,12 +1,18 @@
 package api
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
+	"flag"
 	"github.com/gorilla/mux"
+	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"strings"
 	"sync"
+	"time"
 )
 
 // Structures of users
@@ -242,18 +248,56 @@ func AssignValues(port string, bypass bool, stop int16) {
 }
 
 func StartTheApp() {
+
+	log.Println("Starting the server...!")
+
+	var wait time.Duration
+	flag.DurationVar(&wait, "graceful-timeout", time.Second * 15, "the duration for which the server gracefully wait for existing connections to finish - e.g. 15s or 1m")
+	flag.Parse()
+
 	CreateInitialWorkerProfile()
 
 	router := mux.NewRouter()
 
 	router.HandleFunc("/appscode/workers", ShowAllWorkers).Methods("GET")
-	router.HandleFunc("/appscode/workers/{username}", ShowSinigleWorker).Methods("GET")
+	router.HandleFunc("/appscode/workers/{username: [a-zA-Z]*[a-zA-Z0-9_-]*}", ShowSinigleWorker).Methods("GET")
 	router.HandleFunc("/appscode/workers", AddNewWorker).Methods("POST")
 	router.HandleFunc("/appscode/workers/{username}", UpdateWorkerProfile).Methods("PUT")
 	router.HandleFunc("/appscode/workers/{username}", DeleteWorker).Methods("DELETE")
 
+	srvr.WriteTimeout = time.Second * 15
+	srvr.ReadTimeout = time.Second *15
+	srvr.IdleTimeout = time.Second *60
+
 	srvr.Handler = router
-	srvr.ListenAndServe()
+	log.Println("Just before starting the server")
+
+	go func() {
+		if err := srvr.ListenAndServe(); err != nil {
+			log.Println("Nothing")
+		}
+	}()
+
+
+	// Channel to interrupt the server from keyboard
+	channel := make(chan os.Signal, 1)
+
+	signal.Notify(channel, os.Interrupt)
+	<- channel
+
+	ctx, cancel := context.WithTimeout(context.Background(), wait)
+	defer cancel()
+
+	//  Shutting down the server
+	log.Println("Shutting down the server...!")
+
+	time.Sleep(time.Second * time.Duration(stopTime))
+
+	srvr.Shutdown(ctx)
+
+	log.Println("The server has been shut down...!")
+
+	os.Exit(0)
 }
 
 /*

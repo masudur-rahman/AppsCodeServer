@@ -20,9 +20,9 @@ var startApp = &cobra.Command{
 }
 
 func init() {
-	startApp.PersistentFlags().StringVar(&port, "port", "8080", "port number for the server")
-	startApp.PersistentFlags().BoolVarP(&bypass, "bypass", "b", true, "Bypass authentication parameter")
-	startApp.PersistentFlags().Int16VarP(&stopTime, "stopTime", "s", 2, "The time after which the server will stop")
+	startApp.PersistentFlags().StringVarP(&port, "port", "p", "8080", "port number for the server")
+	startApp.PersistentFlags().BoolVarP(&bypass, "bypass", "b", false, "Bypass authentication parameter")
+	startApp.PersistentFlags().Int16VarP(&stopTime, "stopTime", "s", 0, "The time after which the server will stop")
 
 	rootCmd.AddCommand(startApp)
 }
