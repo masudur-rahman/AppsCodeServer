@@ -39,7 +39,7 @@ var Workers = make(map[string]Worker)
 var authUser = make(map[string]string)
 
 var srvr http.Server
-var byPass bool
+var byPass bool = true
 var stopTime int16
 
 // Handler Functions....
@@ -50,7 +50,6 @@ func ShowAllWorkers(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(info))
 		return
 	}
-
 	if err := json.NewEncoder(w).Encode(Workers); err != nil {
 		panic(err)
 	}
@@ -58,15 +57,16 @@ func ShowAllWorkers(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func ShowSinigleWorker(w http.ResponseWriter, r *http.Request) {
+func ShowSingleWorker(w http.ResponseWriter, r *http.Request) {
+	//fmt.Println("okay")
+	params := mux.Vars(r)
+	//fmt.Println("Username from parameter:", params["username"])
 
 	if info, valid := basicAuth(r); !valid {
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte(info))
 		return
 	}
-
-	params := mux.Vars(r)
 
 	if info, exist := Workers[params["username"]]; exist {
 		json.NewEncoder(w).Encode(info)
@@ -98,7 +98,7 @@ func AddNewWorker(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Workers[worker.Username] = worker
-	json.NewEncoder(w).Encode(Workers)
+	//json.NewEncoder(w).Encode(Workers)
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("201 - Created successfully"))
@@ -112,16 +112,24 @@ func UpdateWorkerProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//params := mux.Vars(r)
+	params := mux.Vars(r)
+
 	var worker Worker
 
 	if err := json.NewDecoder(r.Body).Decode(&worker); err != nil {
 		panic(err)
 	}
 
-	if _, exist := Workers[worker.Username]; !exist {
+
+	if _, exist := Workers[params["username"]]; !exist {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("404 - Content Not Found"))
+		w.Write([]byte("404 - Username Doesn't Exist"))
+		return
+	}
+
+	if params["username"] != worker.Username {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write([]byte("405 - Username can't be changed"))
 		return
 	}
 
@@ -129,7 +137,7 @@ func UpdateWorkerProfile(w http.ResponseWriter, r *http.Request) {
 	mutex.Lock()
 	defer mutex.Unlock()
 	Workers[worker.Username] = worker
-	json.NewEncoder(w).Encode(Workers)
+	// json.NewEncoder(w).Encode(Workers)
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("201 - Updated successfully"))
@@ -153,6 +161,7 @@ func DeleteWorker(w http.ResponseWriter, r *http.Request) {
 
 	delete(Workers, params["username"])
 	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("200 - Deleted Successfully"))
 }
 
 // Creating initial worker profiles
@@ -260,14 +269,14 @@ func StartTheApp() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/appscode/workers", ShowAllWorkers).Methods("GET")
-	router.HandleFunc("/appscode/workers/{username: [a-zA-Z]*[a-zA-Z0-9_-]*}", ShowSinigleWorker).Methods("GET")
+	router.HandleFunc("/appscode/workers/{username}", ShowSingleWorker).Methods("GET")
 	router.HandleFunc("/appscode/workers", AddNewWorker).Methods("POST")
 	router.HandleFunc("/appscode/workers/{username}", UpdateWorkerProfile).Methods("PUT")
 	router.HandleFunc("/appscode/workers/{username}", DeleteWorker).Methods("DELETE")
 
 	srvr.WriteTimeout = time.Second * 15
-	srvr.ReadTimeout = time.Second *15
-	srvr.IdleTimeout = time.Second *60
+	srvr.ReadTimeout = time.Second * 15
+	srvr.IdleTimeout = time.Second * 60
 
 	srvr.Handler = router
 	log.Println("Just before starting the server")
