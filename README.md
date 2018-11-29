@@ -38,4 +38,11 @@ At first we need to get something to run the api server.
 
 `$ docker run -p 8000:8080 <image-name> <additional-argument>` - example : `$ docker run -p 8000:8080 api start --bypass true`
 
-`$ docker run -d --name <new-name> -p <new-port>:<existing-port> <image-name>` - `-d` is used to run as daemon (in background), `--name <name>` to give the image a friendly-name 
+`$ docker run -d --name <new-name> -p <new-port>:<existing-port> <image-name>` - `-d` is used to run as daemon (in background), `--name <name>` to give the image a friendly-name
+
+## Upload to docker hub
+
+`docker push masudjuly02/appscodeserver:busybox`
+
+i.e. : `docker push <user-name>/<image-name>:<tag>` - if tag is not provided :<tag> can be omitted...
+

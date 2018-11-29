@@ -13,12 +13,13 @@
 
 
 
-FROM ubuntu
+FROM busybox:glibc
 
 COPY AppsCodeServer /go/bin/AppsCodeServer
 
-ENTRYPOINT ["/go/bin/AppsCodeServer"]
 
 EXPOSE 8080
 
-CMD ["start", "--bypass", "true"]
+CMD ["--bypass", "true", "--stopTime", "2"]
+
+ENTRYPOINT ["/go/bin/AppsCodeServer", "start"]
