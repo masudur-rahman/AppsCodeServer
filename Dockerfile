@@ -13,13 +13,13 @@
 
 
 
-FROM busybox:glibc
+FROM frolvlad/alpine-glibc
 
 COPY AppsCodeServer /go/bin/AppsCodeServer
 
 
 EXPOSE 8080
 
-CMD ["--bypass", "true", "--stopTime", "2"]
+CMD ["start", "--bypass", "true", "--stopTime", "2"]
 
-ENTRYPOINT ["/go/bin/AppsCodeServer", "start"]
+ENTRYPOINT ["/go/bin/AppsCodeServer"]

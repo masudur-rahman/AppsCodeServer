@@ -12,7 +12,7 @@ var rootCmd = &cobra.Command{
 	Long: "All the worker profile of the AppsCode Ltd." +
 		" is included in this server",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Hello.........!!!")
+		fmt.Println("Welcome.........!!!")
 	},
 }
 
