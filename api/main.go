@@ -43,6 +43,29 @@ var byPass bool = true
 var stopTime int16
 
 // Handler Functions....
+func Welcome(w http.ResponseWriter, r *http.Request) {
+
+	if err := json.NewEncoder(w).Encode("Congratulations...! Your API Server is up and running... :) "); err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func WelcomeToAppsCode(w http.ResponseWriter, r *http.Request) {
+
+	if err := json.NewEncoder(w).Encode("Welcome to AppsCode Ltd.. Available Links are : `/appscode/workers`, `/appscode/workers/{username}`"); err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+
 func ShowAllWorkers(w http.ResponseWriter, r *http.Request) {
 
 	if info, valid := basicAuth(r); !valid {
@@ -268,6 +291,8 @@ func StartTheApp() {
 
 	router := mux.NewRouter()
 
+	router.HandleFunc("/", Welcome).Methods("GET")
+	router.HandleFunc("/appscode", WelcomeToAppsCode).Methods("GET")
 	router.HandleFunc("/appscode/workers", ShowAllWorkers).Methods("GET")
 	router.HandleFunc("/appscode/workers/{username}", ShowSingleWorker).Methods("GET")
 	router.HandleFunc("/appscode/workers", AddNewWorker).Methods("POST")

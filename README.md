@@ -5,14 +5,6 @@ An API Server containing the worker profile. Source code was written in golang. 
 
 ## Run AppsCodeServer - from SourceCode
 
-At first we need to get something to run the api server.
-#### Prerequisites
-
-`go get -u github.com/gorilla/mux`
-
-`go get -u github.com/spf13/cobra/cobra`
-
-
 
 #### Main commands
 `$ go build` - to build api

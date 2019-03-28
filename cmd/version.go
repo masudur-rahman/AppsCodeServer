@@ -14,6 +14,6 @@ var versionCmd = &cobra.Command{
 	Short: "Version of AppsCodeServer",
 	Long:  "The version of the AppsCodeServer app is",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("AppsCodeServer - v1.2 -- HEAD")
+		fmt.Println("AppsCodeServer - v2.0")
 	},
 }
