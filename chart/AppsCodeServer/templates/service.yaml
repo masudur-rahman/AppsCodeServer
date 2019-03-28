@@ -1,0 +1,19 @@
+{{ $root := . }}
+
+apiVersion: v1
+kind: Service
+
+metadata:
+    name: {{ $root.Release.Name }}-service
+    labels:
+        {{- include "labels" . | nindent 8 }}
+spec:
+    selector:
+        {{- include "labels" . | nindent 8 }}
+    ports:
+    {{- with .Values.service }}
+    -   port: {{ .port }}
+        targetPort: {{ .targetPort}}
+        protocol: TCP
+    type: {{ .type }}
+  {{- end }}

@@ -1,0 +1,20 @@
+{{ $root := . }}
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+
+metadata:
+    name: {{ $root.Release.Name }}-ingress
+    labels:
+        {{- include "labels" . | nindent 8 }}
+spec:
+    rules:
+    {{- with .Values.ingress }}
+    -   host: {{ .host }}
+        http:
+            paths:
+            -   path: {{ .path }}
+                backend:
+                    serviceName: {{ $root.Release.Name }}-service
+                    servicePort: {{ .port }}
+    {{- end }}

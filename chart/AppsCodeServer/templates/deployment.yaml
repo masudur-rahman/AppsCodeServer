@@ -1,0 +1,29 @@
+{{ $root := . }}
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+    name: {{ $root.Release.Name }}-deployment
+    labels:
+        {{- include "labels" . | nindent 8 }}
+
+spec:
+    replicas: {{ .Values.replicaCount }}
+    selector:
+        matchLabels:
+            {{- include "labels" . | nindent 12 }}
+    template:
+        metadata:
+            name: {{ $root.Release.Name }}-pod
+            labels:
+                {{- include "labels" . | nindent 16 }}
+        spec:
+            containers:
+            {{- with .Values.image }}
+            -   name: {{ $root.Release.Name }}-container
+                image: {{ .registry }}/{{ .repository }}:{{ .tag }}
+                imagePullPolicy: {{ .pullPolicy }}
+                ports:
+                -   containerPort: {{ .port }}
+            {{- end }}
