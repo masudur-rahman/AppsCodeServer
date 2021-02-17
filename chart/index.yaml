@@ -1,0 +1,20 @@
+apiVersion: v1
+entries:
+  AppsCodeServer:
+  - apiVersion: v1
+    appVersion: "1.0"
+    created: "2021-02-17T10:11:10.9855339+06:00"
+    description: A server for AppsCode worker profile
+    digest: bda722430e7b661a776fa158e61a4110da0426c8f1aa43905b57d26dcc691ae4
+    home: https://github.com/masudur-rahman/AppsCodeServer
+    icon: https://avatars2.githubusercontent.com/u/13915755
+    maintainers:
+    - email: masudjuly02@gmail.com
+      name: Masudur Rahman
+    name: AppsCodeServer
+    sources:
+    - https://github.com/masudur-rahman/AppsCodeServer
+    urls:
+    - AppsCodeServer/AppsCodeServer-0.1.0.tgz
+    version: 0.1.0
+generated: "2021-02-17T10:11:10.983551367+06:00"
