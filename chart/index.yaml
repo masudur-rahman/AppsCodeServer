@@ -15,6 +15,6 @@ entries:
     sources:
     - https://github.com/masudur-rahman/AppsCodeServer
     urls:
-    - AppsCodeServer/AppsCodeServer-0.1.0.tgz
+    - https://github.com/masudur-rahman/AppsCodeServer/raw/master/chart/AppsCodeServer/AppsCodeServer-0.1.0.tgz
     version: 0.1.0
 generated: "2021-02-17T10:11:10.983551367+06:00"
